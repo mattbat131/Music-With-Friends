@@ -8,21 +8,23 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
+import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import main.Main;
@@ -52,17 +54,21 @@ public class SongSelection extends JPanel implements GUIInterface{
 	
 	JFileChooser addFile;
 	
-	JLabel searchBarName;
+	JTextField searchBarName;
 	JTextField search;
+	
+	JSeparator separator;
 	
 	MenuListener menuListener;
 	FileNameExtensionFilter filter;
 	
 	String filePath;
 	
+	SpringLayout layout;
+	
 	public SongSelection() {
 		try {
-			filePath = new File("./Music/Music").getCanonicalPath();
+			filePath = new File("./Music/").getCanonicalPath();
 		} catch (IOException e) {
 			Main.errGUI = new ErrorGUI(e.toString());
 			e.printStackTrace();
@@ -74,10 +80,11 @@ public class SongSelection extends JPanel implements GUIInterface{
 		initVars();
 		initDisplay();
 		initActionListeners();
+		loadSongs();
 	}
 	
 	public void addFile(File file) { 
-		File newFile = new File(filePath + file.getName());
+		File newFile = new File(filePath + "/" + file.getName());
 				
 		try {
 			if (!newFile.exists()) {
@@ -94,6 +101,12 @@ public class SongSelection extends JPanel implements GUIInterface{
 	
 	public void addSongToList(String name) {
 		songModel.addElement(name);
+	}
+	
+	public void loadSongs() {
+		for (final File file: (new File(filePath).listFiles())) {
+			songModel.addElement(file.getName());
+		}
 	}
 
 	@Override
@@ -146,12 +159,15 @@ public class SongSelection extends JPanel implements GUIInterface{
 		config.add(reload);
 		config.add(about);
 		
-		searchBarName = new JLabel("Search");
+		searchBarName = new JTextField("Search");
+		searchBarName.setFocusable(false);
 		search = new JTextField();
 		
 		addFile = new JFileChooser("Add Song");
 		filter = new FileNameExtensionFilter("m4a, mp3 or WAV", "m4a", "mp3", "wav");
+        addFile.setAcceptAllFileFilterUsed(false);
 		addFile.setFileFilter(filter);
+		addFile.addChoosableFileFilter(filter);
 		
 		songModel = new DefaultListModel();
 		songs = new JList(songModel);
@@ -159,24 +175,37 @@ public class SongSelection extends JPanel implements GUIInterface{
 		songNames = new ArrayList<String>();
 		
 		menuListener = new MenuListener();
+		
+		separator = new JSeparator(SwingConstants.VERTICAL);
+		
+		layout = new SpringLayout();
 	}
 
 	@Override
 	public void initDisplay() {
-		setLayout(new SpringLayout());
+		setLayout(layout);
 	    
 		menuBar.add(options);
 		menuBar.add(server);
 		menuBar.add(config);
+		menuBar.setBorderPainted(true);
+		menuBar.setSize(100, 300);
 		
 		searchBarName.setText("Search");
 		searchBarName.setSize(new Dimension(100, 100));
-		search.setPreferredSize(new Dimension(100, 50));
+		search.setPreferredSize(new Dimension(200, 30));
 		
-		add(menuBar, 0);
-		add(searchBarName, 1);
-		add(search, 1);
-		add(songScroll, 3);
+		separator.setSize(100, 300);
+		
+		layout.putConstraint(SpringLayout.NORTH, menuBar, 1, SpringLayout.NORTH, this);
+		layout.putConstraint(SpringLayout.EAST, searchBarName, 2, SpringLayout.HORIZONTAL_CENTER, this);
+		layout.putConstraint(SpringLayout.WEST, search, 3, SpringLayout.HORIZONTAL_CENTER, this);
+		layout.putConstraint(SpringLayout.VERTICAL_CENTER, songScroll, 0, SpringLayout.VERTICAL_CENTER, this);
+
+		add(menuBar);
+		add(searchBarName);
+		add(search);
+		add(songScroll);
 
 		
 	}
@@ -205,6 +234,15 @@ public class SongSelection extends JPanel implements GUIInterface{
 					addFile(file);
 				}
 				
+			}
+			else if (e.getActionCommand().equals("RemoveSong")) {
+				try {
+					Files.delete((new File(filePath + "/" + songs.getSelectedValue().toString())).toPath());
+					songModel.remove(songs.getSelectedIndex());
+				} catch (IOException e1) {
+					Main.errGUI = new ErrorGUI(e1.toString());
+					e1.printStackTrace();
+				}
 			}
 		}
 		
