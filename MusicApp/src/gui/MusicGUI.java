@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
@@ -17,7 +19,7 @@ public class MusicGUI extends JFrame implements GUIInterface{
 	private static final long serialVersionUID = 1L;
 		
 	JPanel songControl;
-	JPanel songSelection;
+	SongSelection songSelection;
 	JPanel songPlaying;
 	
 	JButton playButton;
@@ -123,7 +125,12 @@ public class MusicGUI extends JFrame implements GUIInterface{
 	
 	@Override
 	public void initActionListeners() {
-		
+		playButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				songSelection.playSong();
+			}
+		});
 	}
 	
 }

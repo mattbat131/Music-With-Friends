@@ -1,6 +1,6 @@
 package gui;
 
-import java.awt.Color;
+import java.awt.Color;  
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,7 +8,6 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
@@ -103,12 +102,22 @@ public class SongSelection extends JPanel implements GUIInterface{
 		songModel.addElement(name);
 	}
 	
+	public void reloadSongs() {
+		songModel.removeAllElements();
+		loadSongs();
+	}
+	
 	public void loadSongs() {
 		for (final File file: (new File(filePath).listFiles())) {
 			songModel.addElement(file.getName());
 		}
 	}
+	
+	public void playSong() {
+		File file = new File(filePath + "/" + songs.getSelectedValue().toString());
 
+	}
+	
 	@Override
 	public void initVars() {
 		menuBar = new JMenuBar();
